@@ -146,8 +146,12 @@ export default function App() {
           <Ionicons name="close" size={32} color="white" />
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-            <Ionicons name="camera-reverse" size={32} color="white" />
+          <TouchableOpacity style={styles.flipButton} onPress={toggleFlash}>
+            <Ionicons 
+              name={flash === 'off' ? 'flash-off' : 'flash'} 
+              size={32} 
+              color="white" 
+            />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.captureButton} 
@@ -160,12 +164,8 @@ export default function App() {
               <View style={styles.captureCircle} />
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.flipButton} onPress={toggleFlash}>
-            <Ionicons 
-              name={flash === 'off' ? 'flash-off' : 'flash'} 
-              size={32} 
-              color="white" 
-            />
+          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+            <Ionicons name="camera-reverse" size={32} color="white" />
           </TouchableOpacity>
         </View>
       </CameraView>
