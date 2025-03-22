@@ -35,12 +35,21 @@ export default function Results() {
         )}
       </ScrollView>
 
-      <TouchableOpacity 
-        style={styles.retakeButton}
-        onPress={() => router.push('/(camera)/camera')}
-      >
-        <Text style={styles.retakeText}>Retake Image</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          style={[styles.button, styles.retakeButton]}
+          onPress={() => router.push('/(camera)/camera')}
+        >
+          <Text style={styles.buttonText}>Retake Photo</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.button, styles.receiptButton]}
+          onPress={() => router.push('/(camera)/receipt')}
+        >
+          <Text style={styles.buttonText}>Scan Receipt</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -82,15 +91,28 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 5,
   },
-  retakeButton: {
+  buttonContainer: {
     position: 'absolute',
     bottom: 40,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+  },
+  button: {
     padding: 15,
     borderRadius: 10,
+    flex: 1,
+    marginHorizontal: 10,
+    alignItems: 'center',
   },
-  retakeText: {
+  retakeButton: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  receiptButton: {
+    backgroundColor: '#4CAF50',  // Green to match the corner indicators
+  },
+  buttonText: {
     color: 'white',
     fontSize: 16,
   },
