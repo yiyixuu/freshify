@@ -1,12 +1,30 @@
 import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
 import { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 
+interface ReceiptItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface ExpiryItem {
+  name: string;
+  expiration_days: number;
+}
+
+interface ExpiryResults {
+  foods: ExpiryItem[];
+}
+
 export default function App() {
+  const { items } = useLocalSearchParams();
+  const receiptItems = items ? JSON.parse(items as string) : [];
+
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState<FlashMode>('off');
   const [permission, requestPermission] = useCameraPermissions();
@@ -47,17 +65,12 @@ export default function App() {
         }
         setUri(photo.uri);
         
-        console.log('Photo taken:', photo.uri);
-        
         // Convert the photo to base64
         const base64Image = await FileSystem.readAsStringAsync(photo.uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        
-        console.log('Base64 conversion complete');
 
         // Send to backend
-        console.log('Sending to backend...');
         const response = await fetch('http://192.168.2.24:8000/analyze_image', {
           method: 'POST',
           headers: {
@@ -66,10 +79,8 @@ export default function App() {
           },
           body: JSON.stringify({
             image: base64Image,
+            items: receiptItems
           }),
-        }).catch(error => {
-          console.error('Fetch error details:', error);
-          throw error;
         });
 
         let result;
@@ -78,12 +89,25 @@ export default function App() {
             error: 'Failed to analyze image. Please try again with a clearer picture.'
           };
         } else {
-          result = await response.json();
+          const expiryResults = await response.json();
+          
+          // Combine receipt data with expiry data
+          const consolidatedResults = {
+            items: receiptItems.map((receiptItem: ReceiptItem) => {
+              const expiryItem = expiryResults.foods.find(
+                (food: ExpiryItem) => food.name.toLowerCase() === receiptItem.name.toLowerCase()
+              );
+              return {
+                ...receiptItem,
+                expiration_days: expiryItem ? expiryItem.expiration_days : null
+              };
+            })
+          };
+
+          result = consolidatedResults;
         }
 
-        console.log('Analysis result:', result);
-        
-        // Navigate to results screen with the data
+        // Navigate to results screen with consolidated data
         router.push({
           pathname: '/(camera)/results' as any,
           params: { data: JSON.stringify(result) }

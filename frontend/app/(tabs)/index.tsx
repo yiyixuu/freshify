@@ -16,7 +16,7 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome to Freshify</ThemedText>
         <ThemedText type="subtitle">Get started by taking a photo of your groceries</ThemedText>
         <TouchableOpacity 
-          onPress={() => router.push('/(camera)/camera')}
+          onPress={() => router.push('/(camera)/receipt')}
           style={styles.button}
         >
           <ThemedText style={styles.buttonText} type="subtitle">Take Photo</ThemedText>

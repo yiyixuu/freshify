@@ -50,6 +50,16 @@ export default function ReceiptResults() {
         >
           <Text style={styles.buttonText}>Retake Receipt</Text>
         </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.button, styles.nextButton]}
+          onPress={() => router.push({
+            pathname: '/(camera)/camera' as any,
+            params: { items: JSON.stringify(results.items) }
+          })}
+        >
+          <Text style={styles.buttonText}>Take Photo of Items</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -127,14 +137,20 @@ const styles = StyleSheet.create({
     bottom: 40,
     width: '100%',
     paddingHorizontal: 20,
+    flexDirection: 'row',
+    gap: 10,
   },
   button: {
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    flex: 1,
   },
   retakeButton: {
     backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  nextButton: {
+    backgroundColor: '#4CAF50',
   },
   buttonText: {
     color: 'white',
