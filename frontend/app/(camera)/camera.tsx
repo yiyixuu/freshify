@@ -85,20 +85,17 @@ export default function App() {
         });
 
         // Send to backend
-        const response = await fetch(
-          process.env.EXPO_PUBLIC_BACKEND_URL + "/analyze_image",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({
-              image: base64Image,
-              items: receiptItems,
-            }),
-          }
-        );
+        const response = await fetch(`http://${process.env.EXPO_PUBLIC_BACKEND_URL}/analyze_image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            items: receiptItems
+          }),
+        });
 
         let result;
         if (!response.ok) {
