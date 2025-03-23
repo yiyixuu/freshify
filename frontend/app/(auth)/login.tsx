@@ -40,7 +40,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
 
-      <Text style={styles.title}>Loging</Text>
+      <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Enter your emails and password</Text>
 
       <View style={styles.form}>

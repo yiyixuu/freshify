@@ -1,8 +1,9 @@
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function Results() {
+export default function ReceiptResults() {
   const { data } = useLocalSearchParams();
   const results = JSON.parse(data as string);
 
@@ -16,7 +17,7 @@ export default function Results() {
       </TouchableOpacity>
       
       <ScrollView style={styles.scrollContainer}>
-        <Text style={styles.title}>Analysis Results</Text>
+        <Text style={styles.title}>Receipt Analysis</Text>
         
         {results.error ? (
           <View style={styles.errorContainer}>
@@ -24,30 +25,30 @@ export default function Results() {
             <Text style={styles.errorText}>{results.error}</Text>
           </View>
         ) : (
-          results.foods.map((food: { name: string; expiration_days: number }, index: number) => (
-            <View key={index} style={styles.foodItem}>
-              <Text style={styles.foodName}>{food.name}</Text>
-              <Text style={styles.expiry}>
-                Expires in: {food.expiration_days} days
-              </Text>
+          <>
+            {results.items.map((item: { name: string; quantity: number; price: number }, index: number) => (
+              <View key={index} style={styles.itemContainer}>
+                <View style={styles.itemHeader}>
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemQuantity}>x{item.quantity}</Text>
+                </View>
+                <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+              </View>
+            ))}
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalAmount}>${results.total.toFixed(2)}</Text>
             </View>
-          ))
+          </>
         )}
       </ScrollView>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={[styles.button, styles.retakeButton]}
-          onPress={() => router.push('/(camera)/camera')}
-        >
-          <Text style={styles.buttonText}>Retake Photo</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.button, styles.receiptButton]}
           onPress={() => router.push('/(camera)/receipt' as any)}
         >
-          <Text style={styles.buttonText}>Scan Receipt</Text>
+          <Text style={styles.buttonText}>Retake Receipt</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -76,41 +77,64 @@ const styles = StyleSheet.create({
     marginTop: 60,
     textAlign: 'center',
   },
-  foodItem: {
+  itemContainer: {
     padding: 15,
     borderRadius: 10,
     backgroundColor: '#f5f5f5',
     marginBottom: 10,
   },
-  foodName: {
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  itemName: {
     fontSize: 18,
     fontWeight: '600',
+    flex: 1,
   },
-  expiry: {
+  itemQuantity: {
     fontSize: 16,
     color: '#666',
-    marginTop: 5,
+    marginLeft: 10,
+  },
+  itemPrice: {
+    fontSize: 16,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  totalLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  totalAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4CAF50',
   },
   buttonContainer: {
     position: 'absolute',
     bottom: 40,
     width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     paddingHorizontal: 20,
   },
   button: {
     padding: 15,
     borderRadius: 10,
-    flex: 1,
-    marginHorizontal: 10,
     alignItems: 'center',
   },
   retakeButton: {
     backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  receiptButton: {
-    backgroundColor: '#4CAF50',  // Green to match the corner indicators
   },
   buttonText: {
     color: 'white',

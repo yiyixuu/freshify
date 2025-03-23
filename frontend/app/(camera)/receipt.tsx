@@ -58,7 +58,7 @@ export default function App() {
 
         // Send to backend
         console.log('Sending to backend...');
-        const response = await fetch('http://192.168.2.24:8000/analyze', {
+        const response = await fetch('http://192.168.2.24:8000/analyze_receipt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function App() {
         
         // Navigate to results screen with the data
         router.push({
-          pathname: '/(camera)/results' as any,
+          pathname: '/(camera)/receipt_results' as any,
           params: { data: JSON.stringify(result) }
         });
       } catch (error) {

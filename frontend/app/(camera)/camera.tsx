@@ -58,7 +58,7 @@ export default function App() {
 
         // Send to backend
         console.log('Sending to backend...');
-        const response = await fetch('http://192.168.2.24:8000/analyze', {
+        const response = await fetch('http://192.168.2.24:8000/analyze_image', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
