@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from vision import analyze_expiry, analyze_receipt
+from vision import analyze_expiry, analyze_receipt, get_recipe
 import base64
 import tempfile
+from typing import List
 
 app = FastAPI()
 
@@ -12,6 +13,32 @@ class ImageAnalysisRequest(BaseModel):
 
 class ReceiptRequest(BaseModel):
     image: str  # Base64 encoded image
+
+class Ingredient(BaseModel):
+    name: str
+    expiry: int
+
+class RecipeRequest(BaseModel):
+    nutritional_focus: str
+    ingredients: List[Ingredient]
+
+@app.post("/get_recipe")
+async def generate_recipe(request: RecipeRequest):
+    try:
+        # Convert ingredients to list of dicts for the get_recipe function
+        ingredients_list = [
+            {"name": ingredient.name, "expiry": ingredient.expiry}
+            for ingredient in request.ingredients
+        ]
+        
+        # Call the get_recipe function
+        recipe = get_recipe(request.nutritional_focus, ingredients_list)
+        
+        return recipe
+    except Exception as e:
+        return {
+            "error": f"Failed to generate recipe: {str(e)}"
+        }
 
 @app.post("/analyze_image")
 async def analyze_image(request: ImageAnalysisRequest):

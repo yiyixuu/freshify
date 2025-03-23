@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,8 @@ import {
   Image,
   Platform,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { ThemedText } from "@/components/ThemedText";
@@ -31,9 +32,11 @@ export default function MyFoodScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchItems();
+    }, [])
+  );
 
   const fetchItems = async () => {
     try {
@@ -120,30 +123,48 @@ export default function MyFoodScreen() {
           ) : (
             <View style={styles.itemsGrid}>
               {items.map((item) => (
-                <ThemedView key={item.id} style={styles.itemCard}>
-                  <Image
-                    source={{ uri: item.img_url }}
-                    style={styles.itemImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.itemInfo}>
-                    <ThemedText style={styles.itemName}>{item.name}</ThemedText>
-                    <ThemedText style={styles.itemQuantity}>
-                      Quantity: {item.quantity}
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.itemExpiry,
-                        item.expiry <= 5 && styles.expiringText,
-                      ]}
-                    >
-                      Expires in {item.expiry} days
-                    </ThemedText>
-                  </View>
-                  <TouchableOpacity style={styles.removeButton}>
-                    <Ionicons name="close-circle" size={24} color="#22c55e" />
-                  </TouchableOpacity>
-                </ThemedView>
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(tabs)/food-detail",
+                      params: {
+                        id: item.id,
+                        name: item.name,
+                        expiry: item.expiry,
+                        quantity: item.quantity,
+                        img_url: item.img_url,
+                      },
+                    } as any)
+                  }
+                >
+                  <ThemedView style={styles.itemCard}>
+                    <Image
+                      source={{ uri: item.img_url }}
+                      style={styles.itemImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.itemInfo}>
+                      <ThemedText style={styles.itemName}>
+                        {item.name}
+                      </ThemedText>
+                      <ThemedText style={styles.itemQuantity}>
+                        Quantity: {item.quantity}
+                      </ThemedText>
+                      <ThemedText
+                        style={[
+                          styles.itemExpiry,
+                          item.expiry <= 5 && styles.expiringText,
+                        ]}
+                      >
+                        Expires in {item.expiry} days
+                      </ThemedText>
+                    </View>
+                    <TouchableOpacity style={styles.removeButton}>
+                      <Ionicons name="close-circle" size={24} color="#22c55e" />
+                    </TouchableOpacity>
+                  </ThemedView>
+                </TouchableOpacity>
               ))}
             </View>
           )}

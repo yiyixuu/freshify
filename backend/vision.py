@@ -120,3 +120,75 @@ def analyze_receipt(image_path):
     print("Receipt analysis complete for:", image_path)
     print(json.dumps(parsed_json, indent=4))
     return parsed_json
+
+def get_recipe(nutritional_focus: str, ingredients: list):
+    """
+    Generate a recipe based on nutritional focus and available ingredients.
+    
+    Args:
+        nutritional_focus (str): Description of nutritional requirements (e.g., "vitamin-a", "protein", "carbs")
+        ingredients (list): List of dictionaries containing ingredient name and expiry days
+    """
+    # Format ingredients list for the prompt
+    ingredients_list = "\n".join([
+        f"- {item['name']} (Expires in: {item['expiry']} days)"
+        for item in ingredients
+    ])
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": """You are a culinary expert specialized in creating healthy recipes. 
+                Your task is to create recipes that:
+                1. Prioritize using ingredients that are expiring soon
+                2. Match specific nutritional requirements
+                3. Can include additional ingredients not in the inventory
+                4. Are practical and easy to follow"""
+            },
+            {
+                "role": "user",
+                "content": f"""Create a recipe that is {nutritional_focus} using these available ingredients:
+
+{ingredients_list}
+
+Return the recipe in this exact JSON format:
+{{
+    "recipe_name": "Name of the Recipe",
+    "description": "Brief description of the dish and its benefits",
+    "cooking_time": "30 minutes",
+    "ingredients": {{
+        "item1_name": {{"quantity": "1 cup", "have": true}},
+        "item2_name": {{"quantity": "2 tbsp", "have": false}}
+    }}
+}}
+
+Important:
+- Prioritize ingredients expiring in 5 days or less
+- Mark ingredients as "have": true if they're in the provided list
+- Mark additional required ingredients as "have": false
+- Keep instructions clear and concise
+- Include specific quantities in standard measurements
+- Highlight nutritional benefits related to {nutritional_focus}"""
+            }
+        ]
+    )
+    
+    # Extract and parse the response
+    recipe_json = response.choices[0].message.content
+    
+    try:
+        # Clean and parse the JSON
+        clean_json = recipe_json.strip("```json").strip("```").strip()
+        parsed_recipe = json.loads(clean_json)
+        
+        print("Recipe generated successfully")
+        print(json.dumps(parsed_recipe, indent=4))
+        return parsed_recipe
+        
+    except json.JSONDecodeError as e:
+        print("Error parsing recipe JSON:", e)
+        return {
+            "error": "Failed to generate recipe. Please try again."
+        }

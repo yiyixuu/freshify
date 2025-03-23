@@ -63,43 +63,46 @@ export default function HomeScreen() {
       const expiringSoonItems = allItems.filter((item) =>
         isExpiringSoon(item.expiry)
       );
+      const lowQuantityItems = allItems.filter((item) => item.quantity < 2);
       const otherItems = allItems.filter(
-        (item) => !isExpiringSoon(item.expiry)
+        (item) => !isExpiringSoon(item.expiry) && item.quantity >= 2
       );
 
-      // Only fetch images for items expiring soon
+      // Fetch images for both expiring soon and low quantity items
       const itemsWithImages = await Promise.all([
         ...(await Promise.all(
-          expiringSoonItems.map(async (item) => {
-            // Look up the reference image URL
-            const { data: refImage, error: refError } = await supabase
-              .from("food_reference_images")
-              .select("file_name")
-              .eq("food_name", item.name.toLowerCase())
-              .single();
+          [...new Set([...expiringSoonItems, ...lowQuantityItems])].map(
+            async (item) => {
+              // Look up the reference image URL
+              const { data: refImage, error: refError } = await supabase
+                .from("food_reference_images")
+                .select("file_name")
+                .eq("food_name", item.name.toLowerCase())
+                .single();
 
-            if (refError) {
-              console.error(
-                `Error fetching reference image for ${item.name}:`,
-                refError
-              );
+              if (refError) {
+                console.error(
+                  `Error fetching reference image for ${item.name}:`,
+                  refError
+                );
+                return item;
+              }
+
+              if (refImage?.file_name) {
+                // Get the actual image URL from storage
+                const { data, error } = await supabase.storage
+                  .from("food-images")
+                  .createSignedUrl(refImage.file_name, 60);
+
+                return {
+                  ...item,
+                  img_url: data?.signedUrl,
+                };
+              }
+
               return item;
             }
-
-            if (refImage?.file_name) {
-              // Get the actual image URL from storage
-              const { data, error } = await supabase.storage
-                .from("food-images")
-                .createSignedUrl(refImage.file_name, 60);
-
-              return {
-                ...item,
-                img_url: data?.signedUrl,
-              };
-            }
-
-            return item;
-          })
+          )
         )),
         ...otherItems, // Add other items without fetching images
       ]);
@@ -144,7 +147,7 @@ export default function HomeScreen() {
 
         <ThemedView style={styles.content}>
           <View style={styles.statsContainer}>
-            <ThemedText type="title">Weekly Save's?</ThemedText>
+            <ThemedText type="title">Weekly Saves?</ThemedText>
             <TouchableOpacity>
               <ThemedText style={styles.reportText}>See Report</ThemedText>
             </TouchableOpacity>
@@ -162,7 +165,7 @@ export default function HomeScreen() {
                 {calculateMeals()}
               </ThemedText>
               <ThemedText style={styles.statsLabel}>
-                263 Meals This Year
+                263 Foods This Year
               </ThemedText>
             </ThemedView>
           </View>
@@ -193,6 +196,39 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </ThemedView>
             ))}
+          </View>
+
+          {/* Purchase More Section */}
+          <View style={[styles.sectionHeader, styles.sectionSpacing]}>
+            <ThemedText type="title">Purchase More</ThemedText>
+            <TouchableOpacity>
+              <ThemedText style={styles.seeAll}>See all</ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.itemsGrid}>
+            {items
+              .filter((item) => item.quantity < 2)
+              .map((item) => (
+                <ThemedView key={item.id} style={styles.itemCard}>
+                  <Image
+                    source={{ uri: item.img_url }}
+                    style={styles.itemImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.itemInfo}>
+                    <ThemedText style={styles.itemName}>{item.name}</ThemedText>
+                    <ThemedText
+                      style={[styles.itemQuantity, styles.lowQuantity]}
+                    >
+                      Only {item.quantity} left
+                    </ThemedText>
+                  </View>
+                  <TouchableOpacity style={styles.addButton}>
+                    <Ionicons name="add-circle" size={24} color="#22c55e" />
+                  </TouchableOpacity>
+                </ThemedView>
+              ))}
           </View>
 
           <TouchableOpacity
@@ -321,5 +357,20 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  sectionSpacing: {
+    marginTop: 32,
+  },
+  itemQuantity: {
+    fontSize: 14,
+    color: "#64748b",
+    marginBottom: 4,
+  },
+  lowQuantity: {
+    color: "#ef4444",
+    fontWeight: "500",
+  },
+  addButton: {
+    padding: 4,
   },
 });
