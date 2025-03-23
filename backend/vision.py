@@ -11,6 +11,22 @@ OPENAI_KEY = os.getenv("OPENAI_KEY")
 # Set up OpenAI client
 client = OpenAI(api_key=OPENAI_KEY)
 
+items = [
+    "banana",
+    "chicken breast",
+    "oranges",
+    "pear",
+    "salmon",
+    "shrimp",
+    "tomato sauce",
+    "yogurt",
+    "rice",
+    "butter",
+    "milk",
+    "egg",
+    "olive oil"
+]
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
@@ -93,7 +109,7 @@ def analyze_receipt(image_path):
                 "content": [
                     { 
                         "type": "input_text", 
-                        "text": "You will be provided an image of a receipt. I need your help to extract the items, quantities, and prices from the receipt. Your response must be a JSON object formatted as follows:\n\n```json\n{\n  \"items\": [\n    {\"name\": \"Apple\", \"quantity\": 2, \"price\": 3.99},\n    {\"name\": \"Milk\", \"quantity\": 1, \"price\": 4.99}\n  ],\n  \"total\": 12.97\n}\n```\n\n- Each item should be entered as a separate object inside the `items` list.\n- `name` should be a string (the item name as it appears on the receipt).\n- `quantity` should be an integer.\n- `price` should be a number (float) representing the price per item.\n- Include a `total` field with the total amount from the receipt.\n- If no items are found or the receipt is unclear, respond with \"no items detected\"" 
+                        "text": "You will be provided an image of a receipt. I need your help to extract the items, quantities, and prices from the receipt. Please only identify items that are outlined in this list: " + str(items) + ". Your response must be a JSON object formatted as follows:\n\n```json\n{\n  \"items\": [\n    {\"name\": \"Apple\", \"quantity\": 2, \"price\": 3.99},\n    {\"name\": \"Milk\", \"quantity\": 1, \"price\": 4.99}\n  ],\n  \"total\": 12.97\n}\n```\n\n- Each item should be entered as a separate object inside the `items` list.\n- `name` should be a string (the item name as it appears on the receipt).\n- `quantity` should be an integer.\n- `price` should be a number (float) representing the price per item.\n- Include a `total` field with the total amount from the receipt.\n- If no items are found or the receipt is unclear, respond with \"no items detected\""
                     },
                     {
                         "type": "input_image",

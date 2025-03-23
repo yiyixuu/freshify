@@ -73,7 +73,7 @@ export default function App() {
         // Send to backend
         console.log("Sending to backend...");
         const response = await fetch(
-          process.env.EXPO_PUBLIC_BACKEND_URL + "/analyze_receipt",
+          `http://${process.env.EXPO_PUBLIC_BACKEND_URL}/analyze_receipt`,
           {
             method: "POST",
             headers: {

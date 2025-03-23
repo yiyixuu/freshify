@@ -114,7 +114,7 @@ export default function HomeScreen() {
   };
 
   const calculateSavings = () => {
-    return items.reduce((total, item) => total + (item.price || 0), 0);
+    return items.reduce((total, item) => total + (item.price || 0), 0).toFixed(2);
   };
 
   const calculateMeals = () => {
