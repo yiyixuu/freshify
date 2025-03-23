@@ -85,7 +85,7 @@ export default function App() {
         });
 
         // Send to backend
-        const response = await fetch(`http://${process.env.EXPO_PUBLIC_BACKEND_URL}/analyze_image`, {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/analyze_image`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +129,8 @@ export default function App() {
           params: { data: JSON.stringify(result) },
         });
       } catch (error) {
-        console.log("Error taking picture");
+        console.log("Error taking picture", error);
+        console.log("Backend URL:", process.env.EXPO_PUBLIC_BACKEND_URL);
         router.push({
           pathname: "/(camera)/results" as any,
           params: {

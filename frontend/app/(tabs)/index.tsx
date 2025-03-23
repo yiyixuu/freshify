@@ -37,7 +37,7 @@ export default function HomeScreen() {
   }, []);
 
   const isExpiringSoon = (expiryDays: number) => {
-    return expiryDays <= 5; // Item expires in 5 days or less
+    return expiryDays <= 10;
   };
 
   const fetchItems = async () => {
@@ -209,6 +209,7 @@ export default function HomeScreen() {
           <View style={styles.itemsGrid}>
             {items
               .filter((item) => item.quantity < 2)
+              .slice(0, 2)
               .map((item) => (
                 <ThemedView key={item.id} style={styles.itemCard}>
                   <Image

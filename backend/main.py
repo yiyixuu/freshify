@@ -22,24 +22,7 @@ class RecipeRequest(BaseModel):
     nutritional_focus: str
     ingredients: List[Ingredient]
 
-@app.post("/get_recipe")
-async def generate_recipe(request: RecipeRequest):
-    try:
-        # Convert ingredients to list of dicts for the get_recipe function
-        ingredients_list = [
-            {"name": ingredient.name, "expiry": ingredient.expiry}
-            for ingredient in request.ingredients
-        ]
-        
-        # Call the get_recipe function
-        recipe = get_recipe(request.nutritional_focus, ingredients_list)
-        
-        return recipe
-    except Exception as e:
-        return {
-            "error": f"Failed to generate recipe: {str(e)}"
-        }
-
+    
 @app.post("/analyze_image")
 async def analyze_image(request: ImageAnalysisRequest):
     # Create a temporary file to store the image
@@ -67,6 +50,34 @@ async def analyze_receipt_image(request: ReceiptRequest):
         result = analyze_receipt(temp_file.name)
         
         return result
+    
+
+
+class Ingredient(BaseModel):
+    name: str
+    expiry: int
+
+class RecipeRequest(BaseModel):
+    nutritional_focus: str
+    ingredients: List[Ingredient]
+
+@app.post("/get_recipe")
+async def generate_recipe(request: RecipeRequest):
+    try:
+        # Convert ingredients to list of dicts for the get_recipe function
+        ingredients_list = [
+            {"name": ingredient.name, "expiry": ingredient.expiry}
+            for ingredient in request.ingredients
+        ]
+        
+        # Call the get_recipe function
+        recipe = get_recipe(request.nutritional_focus, ingredients_list)
+        print(recipe)
+        return recipe
+    except Exception as e:
+        return {
+            "error": f"Failed to generate recipe: {str(e)}"
+        }
 
 @app.get("/")
 async def root():

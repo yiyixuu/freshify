@@ -106,6 +106,7 @@ export default function RecipeListScreen() {
       }
 
       const recipeData = await response.json();
+      console.log(recipeData);
       setRecipe(recipeData);
     } catch (error: any) {
       console.error("Error fetching recipe:", error);
@@ -135,30 +136,9 @@ export default function RecipeListScreen() {
 
       if (itemsError) throw itemsError;
 
-      const itemsWithImages = await Promise.all(
-        (items || []).map(async (item) => {
-          const { data: refImage, error: refError } = await supabase
-            .from("food_reference_images")
-            .select("file_name")
-            .eq("food_name", item.name.toLowerCase())
-            .single();
-
-          if (refError || !refImage?.file_name) return item;
-
-          const { data } = await supabase.storage
-            .from("food-images")
-            .createSignedUrl(refImage.file_name, 60);
-
-          return {
-            ...item,
-            img_url: data?.signedUrl,
-          };
-        })
-      );
-
-      setItems(itemsWithImages);
+      setItems(items || []);
       // Fetch recipe after getting inventory items
-      await fetchRecipe(itemsWithImages);
+      await fetchRecipe(items || []);
     } catch (error: any) {
       console.error("Error fetching inventory items:", error.message);
       setError(error.message);
@@ -236,14 +216,6 @@ export default function RecipeListScreen() {
                 <View key={index} style={styles.instructionStep}>
                   <ThemedText style={styles.stepNumber}>{index + 1}</ThemedText>
                   <ThemedText style={styles.stepText}>{step}</ThemedText>
-                </View>
-              ))}
-
-              <ThemedText style={styles.sectionTitle}>Benefits</ThemedText>
-              {recipe.nutritional_benefits.map((benefit, index) => (
-                <View key={index} style={styles.benefitItem}>
-                  <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
-                  <ThemedText style={styles.benefitText}>{benefit}</ThemedText>
                 </View>
               ))}
             </>

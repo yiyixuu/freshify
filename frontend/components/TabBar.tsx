@@ -12,7 +12,7 @@ export function TabBar() {
     { name: "My Food", icon: "search", route: "/myfood" },
     { name: "Recipes", icon: "restaurant", route: "/recipes" },
     { name: "Impact", icon: "heart", route: "/impact" },
-    { name: "Account", icon: "person", route: "/account" },
+    { name: "Account", icon: "person", route: "/(auth)/login" },
   ];
 
   return (

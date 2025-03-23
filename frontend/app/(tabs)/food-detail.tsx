@@ -41,34 +41,34 @@ export default function FoodDetailScreen() {
 
   const handleMarkCompleted = async () => {
     try {
-      // const { error: updateError } = await supabase
-      //   .from("items")
-      //   .delete()
-      //   .eq("id", params.id);
+      const { error: updateError } = await supabase
+        .from("items")
+        .delete()
+        .eq("id", params.id);
 
-      // if (updateError) {
-      //   console.error("Error updating item:", updateError);
-      //   throw updateError;
-      // }
+      if (updateError) {
+        console.error("Error updating item:", updateError);
+        throw updateError;
+      }
 
       console.log(expiryDays);
 
       // Increment waste counters if food is about to expire
-      if (expiryDays <= 3) {
-        console.log("Incrementing impact counters");
-        const { error: impactError } = await supabase.rpc(
-          "increment_impact_counters",
-          {
-            money_amount: parseFloat(params.price || "0"),
-            meals_amount: 1,
-            user_id: params.user_id,
-          }
-        );
-        if (impactError) {
-          console.error("Error updating impact:", impactError);
-          throw impactError;
-        }
-      }
+      // if (expiryDays <= 3) {
+      //   console.log("Incrementing impact counters");
+      //   const { error: impactError } = await supabase.rpc(
+      //     "increment_impact_counters",
+      //     {
+      //       money_amount: parseFloat(params.price || "0"),
+      //       meals_amount: 1,
+      //       user_id: params.user_id,
+      //     }
+      //   );
+      //   if (impactError) {
+      //     console.error("Error updating impact:", impactError);
+      //     throw impactError;
+      //   }
+      // }
 
       router.back();
     } catch (error) {
@@ -100,18 +100,18 @@ export default function FoodDetailScreen() {
       }
 
       // Increment waste counters
-      const { error: wasteError } = await supabase.rpc(
-        "increment_waste_counters",
-        {
-          user_id: user.id,
-          amount: quantity,
-        }
-      );
+      // const { error: wasteError } = await supabase.rpc(
+      //   "increment_waste_counters",
+      //   {
+      //     user_id: user.id,
+      //     amount: quantity,
+      //   }
+      // );
 
-      if (wasteError) {
-        console.error("Error updating waste counters:", wasteError);
-        throw wasteError;
-      }
+      // if (wasteError) {
+      //   console.error("Error updating waste counters:", wasteError);
+      //   throw wasteError;
+      // }
 
       router.back();
     } catch (error) {
@@ -220,7 +220,7 @@ export default function FoodDetailScreen() {
             style={styles.stateButton}
             onPress={handleMarkCompleted}
           >
-            <ThemedText style={styles.stateButtonText}>Completed</ThemedText>
+            <ThemedText style={styles.stateButtonText}>Consumed</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.stateButton, styles.wastedButton]}
