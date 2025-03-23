@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 20,
+    paddingRight: 30,
   },
   logo: {
     width: 40,

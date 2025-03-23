@@ -1,14 +1,26 @@
-import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
-import { useState, useRef } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import { Image } from 'expo-image';
+import {
+  CameraView,
+  CameraType,
+  useCameraPermissions,
+  FlashMode,
+} from "expo-camera";
+import { useState, useRef } from "react";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
+import { Image } from "expo-image";
 
 export default function App() {
-  const [facing, setFacing] = useState<CameraType>('back');
-  const [flash, setFlash] = useState<FlashMode>('off');
+  const [facing, setFacing] = useState<CameraType>("back");
+  const [flash, setFlash] = useState<FlashMode>("off");
   const [permission, requestPermission] = useCameraPermissions();
   const [loading, setLoading] = useState(false);
   const [uri, setUri] = useState<string | null>(null);
@@ -23,18 +35,20 @@ export default function App() {
     // Camera permissions are not granted yet.
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Text style={styles.message}>
+          We need your permission to show the camera
+        </Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
   }
 
   function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === "back" ? "front" : "back"));
   }
 
   function toggleFlash() {
-    setFlash(current => current === 'off' ? 'on' : 'off');
+    setFlash((current) => (current === "off" ? "on" : "off"));
   }
 
   const takePicture = async () => {
@@ -43,60 +57,65 @@ export default function App() {
         setLoading(true);
         const photo = await cameraRef.current.takePictureAsync();
         if (!photo) {
-          throw new Error('Failed to take picture');
+          throw new Error("Failed to take picture");
         }
         setUri(photo.uri);
-        
-        console.log('Photo taken:', photo.uri);
-        
+
+        console.log("Photo taken:", photo.uri);
+
         // Convert the photo to base64
         const base64Image = await FileSystem.readAsStringAsync(photo.uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        
-        console.log('Base64 conversion complete');
+
+        console.log("Base64 conversion complete");
 
         // Send to backend
-        console.log('Sending to backend...');
-        const response = await fetch('http://192.168.2.24:8000/analyze_receipt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            image: base64Image,
-          }),
-        }).catch(error => {
-          console.error('Fetch error details:', error);
+        console.log("Sending to backend...");
+        const response = await fetch(
+          process.env.EXPO_PUBLIC_BACKEND_URL + "/analyze_receipt",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              image: base64Image,
+            }),
+          }
+        ).catch((error) => {
+          console.error("Fetch error details:", error);
           throw error;
         });
 
         let result;
         if (!response.ok) {
           result = {
-            error: 'Failed to analyze image. Please try again with a clearer picture.'
+            error:
+              "Failed to analyze image. Please try again with a clearer picture.",
           };
         } else {
           result = await response.json();
         }
 
-        console.log('Analysis result:', result);
-        
+        console.log("Analysis result:", result);
+
         // Navigate to results screen with the data
         router.push({
-          pathname: '/(camera)/receipt_results' as any,
-          params: { data: JSON.stringify(result) }
+          pathname: "/(camera)/receipt_results" as any,
+          params: { data: JSON.stringify(result) },
         });
       } catch (error) {
-        console.log('Error taking picture');
+        console.log("Error taking picture");
         router.push({
-          pathname: '/(camera)/results' as any,
-          params: { 
+          pathname: "/(camera)/results" as any,
+          params: {
             data: JSON.stringify({
-              error: 'Failed to process image. Please check your connection and try again.'
-            })
-          }
+              error:
+                "Failed to process image. Please check your connection and try again.",
+            }),
+          },
         });
       } finally {
         setLoading(false);
@@ -124,10 +143,10 @@ export default function App() {
 
   const renderCamera = () => {
     return (
-      <CameraView 
+      <CameraView
         ref={cameraRef}
-        style={styles.camera} 
-        facing={facing} 
+        style={styles.camera}
+        facing={facing}
         flash={flash}
       >
         <View style={styles.cornerOverlay}>
@@ -137,24 +156,26 @@ export default function App() {
           <View style={[styles.corner, styles.bottomRight]} />
         </View>
         <View style={styles.instructionOverlay}>
-          <Text style={styles.instructionText}>Take a picture of your receipt</Text>
+          <Text style={styles.instructionText}>
+            Take a picture of your receipt
+          </Text>
         </View>
-        <TouchableOpacity 
-          style={styles.closeButton} 
-          onPress={() => router.push('/(tabs)')}
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => router.push("/(tabs)")}
         >
           <Ionicons name="close" size={32} color="white" />
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.flipButton} onPress={toggleFlash}>
-            <Ionicons 
-              name={flash === 'off' ? 'flash-off' : 'flash'} 
-              size={32} 
-              color="white" 
+            <Ionicons
+              name={flash === "off" ? "flash-off" : "flash"}
+              size={32}
+              color="white"
             />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.captureButton} 
+          <TouchableOpacity
+            style={styles.captureButton}
             onPress={takePicture}
             disabled={loading}
           >
@@ -164,7 +185,10 @@ export default function App() {
               <View style={styles.captureCircle} />
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+          <TouchableOpacity
+            style={styles.flipButton}
+            onPress={toggleCameraFacing}
+          >
             <Ionicons name="camera-reverse" size={32} color="white" />
           </TouchableOpacity>
         </View>
@@ -182,10 +206,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   message: {
-    textAlign: 'center',
+    textAlign: "center",
     paddingBottom: 10,
   },
   camera: {
@@ -193,86 +217,86 @@ const styles = StyleSheet.create({
   },
   preview: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 60,
     right: 20,
     zIndex: 1,
   },
   buttonContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 40,
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
   flipButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   captureButton: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 4,
-    borderColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
   captureCircle: {
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   retakeButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 40,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
     padding: 15,
     borderRadius: 10,
   },
   retakeText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   analysisOverlay: {
-    position: 'absolute',
-    top: '50%',
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    position: "absolute",
+    top: "50%",
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
     borderRadius: 10,
     padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   analysisText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   instructionOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 80,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
     borderRadius: 10,
     padding: 15,
   },
   instructionText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   cornerOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 120,
     left: 0,
     right: 0,
@@ -280,10 +304,10 @@ const styles = StyleSheet.create({
     margin: 40,
   },
   corner: {
-    position: 'absolute',
+    position: "absolute",
     width: 40,
     height: 40,
-    borderColor: '#4CAF50',  // Material Design green
+    borderColor: "#4CAF50", // Material Design green
     borderWidth: 4,
   },
   topLeft: {
